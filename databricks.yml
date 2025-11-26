@@ -1,0 +1,105 @@
+# This is a Databricks asset bundle definition for documents_parsing.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: documents_parsing
+  uuid: 455a6ddb-7742-4dae-a9bd-2c6e348b389e
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+# Variable declarations. These variables are assigned in the dev/prod targets below.
+variables:
+  bronze_catalog:
+    description: The catalog to use
+  bronze_schema:
+    description: The schema to use
+  bronze_table:
+    description: The table to use
+  bronze_volume_path:
+    description: The volume to use
+  maxfilespertrigger:
+    description: The maximum number of new bytes to be processed in every trigger. You can specify a byte string such as 10g to limit each microbatch to 10 GB of data. This is a soft maximum. If you have files that are 3 GB each, Databricks processes 12 GB in a microbatch. When used together with cloudFiles.maxFilesPerTrigger, Databricks consumes up to the lower limit of cloudFiles.maxFilesPerTrigger or cloudFiles.maxBytesPerTrigger, whichever is reached first.
+
+  silver_catalog:
+    description: The catalog to use
+  silver_schema:
+    description: The schema to use
+  silver_table:
+    description: The table to use
+  silver_volume_path:
+    description: The volume to use
+
+  gold_catalog:
+    description: The catalog to use
+  gold_schema:
+    description: The schema to use
+  gold_table:
+    description: The table to use
+  gold_volume_path:
+    description: The volume to use
+
+  gold_table_primary_key:
+    description: Primary key for vector search index
+  
+  gold_table_text:
+    description: Column with text that will be embedding
+  
+  vector_search_endpoint_name:
+    description: Name of the vector search compute
+  
+  embedding_model_endpoint_name:
+    description: Name of the model that will be use for the embedding
+
+
+  
+
+
+  
+
+targets:
+  dev:
+    # The default target uses 'mode: development' to create a development copy.
+    # - Deployed resources get prefixed with '[dev my_user_name]'
+    # - Any job schedules and triggers are paused by default.
+    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-1115853741771969.9.azuredatabricks.net
+    variables:
+      bronze_catalog: genai
+      bronze_schema: bronze
+      bronze_table: "university_docs"
+      bronze_volume_path: "/Volumes/genai/bronze/raw_data/university_docs/"
+      maxfilespertrigger: 10
+
+      silver_catalog: genai
+      silver_schema: silver
+      silver_table: "university_docs_parsed"
+      silver_volume_path: "/Volumes/genai/silver/docs_parsed"
+
+      gold_catalog: genai
+      gold_schema: gold
+      gold_table: "university_docs_parsed_chunks"
+      gold_volume_path: "/Volumes/genai/gold/docs_chunked_parsed"
+
+      gold_table_primary_key: "chunk_index"
+      gold_table_text: "chunk_text"
+      vector_search_endpoint_name: "vector_search_demo_endpoint"
+      embedding_model_endpoint_name : "databricks-gte-large-en"
+      
+
+
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-1115853741771969.9.azuredatabricks.net
+      # We explicitly deploy to /Workspace/Users/joel.ramirez@databricks.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/joel.ramirez@databricks.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: genai
+      schema: prod
+    permissions:
+      - user_name: joel.ramirez@databricks.com
+        level: CAN_MANAGE

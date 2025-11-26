@@ -1,0 +1,82 @@
+resources:
+  jobs:
+    vector_search_job:
+      name: vector_search_job
+      tasks:
+        - task_key: pdf_load
+          notebook_task:
+            notebook_path: /Workspace/Users/joel.ramirez@databricks.com/documents_parsing/documents_parsing/src/pdf_parsing/Bronze
+            source: WORKSPACE
+          environment_key: Default
+      
+
+        - task_key: pdf_parsing
+          notebook_task:
+            notebook_path: /Workspace/Users/joel.ramirez@databricks.com/documents_parsing/documents_parsing/src/pdf_parsing/Silver
+            source: WORKSPACE
+          environment_key: Default
+          depends_on:
+            - task_key: pdf_load
+        
+        - task_key: pdf_parsing_chunks
+          notebook_task:
+            notebook_path: /Workspace/Users/joel.ramirez@databricks.com/documents_parsing/documents_parsing/src/pdf_parsing/Gold
+            source: WORKSPACE
+          environment_key: Default
+          depends_on:
+            - task_key: pdf_parsing
+              
+        - task_key: setting_up_vector_search_index
+          notebook_task:
+            notebook_path: /Workspace/Users/joel.ramirez@databricks.com/documents_parsing/documents_parsing/src/pdf_parsing/vector_search
+            source: WORKSPACE
+          environment_key: Default
+          depends_on:
+            - task_key: pdf_parsing_chunks
+              
+      queue:
+        enabled: true
+      parameters:
+        - name: bronze_catalog
+          default: ${var.bronze_catalog}
+        - name: bronze_schema
+          default: ${var.bronze_schema}
+        - name: bronze_table
+          default: ${var.bronze_table}
+        - name: bronze_volume_path
+          default: ${var.bronze_volume_path}
+        - name: maxfilespertrigger
+          default: 10
+        
+        - name: silver_catalog
+          default: ${var.silver_catalog}
+        - name: silver_schema
+          default: ${var.silver_schema}
+        - name: silver_table
+          default: ${var.silver_table}
+        - name: silver_volume_path
+          default: ${var.silver_volume_path}
+
+        - name: gold_catalog
+          default: ${var.gold_catalog}
+        - name: gold_schema
+          default: ${var.gold_schema}
+        - name: gold_table
+          default: ${var.gold_table}
+        - name: gold_volume_path
+          default: ${var.gold_volume_path}
+        
+        - name: gold_table_primary_key
+          default: ${var.gold_table_primary_key}
+        - name: gold_table_text
+          default: ${var.gold_table_text}
+        - name: vector_search_endpoint_name
+          default: ${var.vector_search_endpoint_name}
+        - name: embedding_model_endpoint_name
+          default: ${var.embedding_model_endpoint_name}
+
+      environments:
+        - environment_key: Default
+          spec:
+            environment_version: "4"
+      performance_target: PERFORMANCE_OPTIMIZED
