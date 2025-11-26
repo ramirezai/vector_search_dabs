@@ -5,22 +5,21 @@ resources:
       tasks:
         - task_key: pdf_load
           notebook_task:
-            notebook_path: /Workspace/Users/joel.ramirez@databricks.com/documents_parsing/documents_parsing/src/pdf_parsing/Bronze
+            notebook_path: <insert_notebook_path>
             source: WORKSPACE
           environment_key: Default
       
 
         - task_key: pdf_parsing
           notebook_task:
-            notebook_path: /Workspace/Users/joel.ramirez@databricks.com/documents_parsing/documents_parsing/src/pdf_parsing/Silver
-            source: WORKSPACE
+            notebook_path: <insert_notebook_path>
           environment_key: Default
           depends_on:
             - task_key: pdf_load
         
         - task_key: pdf_parsing_chunks
           notebook_task:
-            notebook_path: /Workspace/Users/joel.ramirez@databricks.com/documents_parsing/documents_parsing/src/pdf_parsing/Gold
+            notebook_path: <insert_notebook_path>
             source: WORKSPACE
           environment_key: Default
           depends_on:
@@ -28,7 +27,7 @@ resources:
               
         - task_key: setting_up_vector_search_index
           notebook_task:
-            notebook_path: /Workspace/Users/joel.ramirez@databricks.com/documents_parsing/documents_parsing/src/pdf_parsing/vector_search
+            notebook_path: <insert_notebook_path>
             source: WORKSPACE
           environment_key: Default
           depends_on:
